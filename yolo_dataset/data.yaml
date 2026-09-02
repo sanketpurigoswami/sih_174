@@ -1,0 +1,11 @@
+path: F:/sih/yolo_dataset
+
+train: images/train
+val: images/val
+
+names:
+  0: screwdriver
+  1: nail_cutter
+  2: wireless_earbuds_case
+  3: chocolate_bar_wrapper
+  4: hand

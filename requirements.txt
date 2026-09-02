@@ -1,0 +1,4 @@
+object detection part -----
+
+person detect
+equipment detect
