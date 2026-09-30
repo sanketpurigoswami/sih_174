@@ -1,0 +1,34 @@
+[
+  {
+    "step_id": 1,
+    "source_text": "Pick up the mouse and place it in Slot 1.",
+    "high_level_action": "PLACE",
+    "object": "MOUSE",
+    "target": "SLOT_1",
+    "atomic_actions": [
+      {"action":"REACH","object":"MOUSE","target":"SLOT_1","order":1},
+      {"action":"GRASP","object":"MOUSE","target":"SLOT_1","order":2},
+      {"action":"LIFT","object":"MOUSE","target":"SLOT_1","order":3},
+      {"action":"MOVE","object":"MOUSE","target":"SLOT_1","order":4},
+      {"action":"PLACE","object":"MOUSE","target":"SLOT_1","order":5},
+      {"action":"RELEASE","object":"MOUSE","target":"SLOT_1","order":6}
+    ],
+    "completion_condition": "RELEASE"
+  },
+  {
+    "step_id": 2,
+    "source_text": "Pick up the earbuds case and place it in Slot 2.",
+    "high_level_action": "PLACE",
+    "object": "EARBUDS_CASE",
+    "target": "SLOT_2",
+    "atomic_actions": [
+      {"action":"REACH","object":"EARBUDS_CASE","target":"SLOT_2","order":1},
+      {"action":"GRASP","object":"EARBUDS_CASE","target":"SLOT_2","order":2},
+      {"action":"LIFT","object":"EARBUDS_CASE","target":"SLOT_2","order":3},
+      {"action":"MOVE","object":"EARBUDS_CASE","target":"SLOT_2","order":4},
+      {"action":"PLACE","object":"EARBUDS_CASE","target":"SLOT_2","order":5},
+      {"action":"RELEASE","object":"EARBUDS_CASE","target":"SLOT_2","order":6}
+    ],
+    "completion_condition": "RELEASE"
+  }
+]

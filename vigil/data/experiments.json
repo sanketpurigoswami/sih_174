@@ -1,0 +1,76 @@
+[
+  {
+    "id": "phase-1",
+    "name": "Phase 1 — Orange Cap Placement",
+    "steps": [
+      { "id": 1, "label": "Pick up the orange circular cap", "expected_object": "orange_circular_cap", "expected_action": "GRASP" },
+      { "id": 2, "label": "Move the orange circular cap towards yellow square", "expected_object": "orange_circular_cap", "expected_action": "MOVE" },
+      { "id": 3, "label": "Place the orange circular cap on yellow square", "expected_object": "orange_circular_cap", "expected_action": "RELEASE", "target_surface": "yellow_square" }
+    ]
+  },
+  {
+    "id": "phase-2",
+    "name": "Phase 2 — Mouse Handling",
+    "steps": [
+      { "id": 1, "label": "Pick up the red computer mouse", "expected_object": "red_computer_mouse", "expected_action": "GRASP" },
+      { "id": 2, "label": "Move the red computer mouse towards pink square", "expected_object": "red_computer_mouse", "expected_action": "MOVE" },
+      { "id": 3, "label": "Place the red computer mouse on pink square", "expected_object": "red_computer_mouse", "expected_action": "RELEASE", "target_surface": "pink_square" }
+    ]
+  },
+  {
+    "id": "phase-3",
+    "name": "Phase 3 — Earbuds Case Test",
+    "steps": [
+      { "id": 1, "label": "Pick up the wireless earbuds case", "expected_object": "wireless_earbuds_case", "expected_action": "GRASP" },
+      { "id": 2, "label": "Move the earbuds case towards green square", "expected_object": "wireless_earbuds_case", "expected_action": "MOVE" },
+      { "id": 3, "label": "Place the earbuds case on green square", "expected_object": "wireless_earbuds_case", "expected_action": "RELEASE", "target_surface": "green_square" }
+    ]
+  },
+  {
+    "id": "phase-4",
+    "name": "Phase 4 — Dark Blue Square Sort",
+    "steps": [
+      { "id": 1, "label": "Pick up the dark blue square", "expected_object": "dark_blue_square", "expected_action": "GRASP" },
+      { "id": 2, "label": "Move the dark blue square towards white box", "expected_object": "dark_blue_square", "expected_action": "MOVE" },
+      { "id": 3, "label": "Place the dark blue square on white box", "expected_object": "dark_blue_square", "expected_action": "RELEASE", "target_surface": "white_box" }
+    ]
+  },
+  {
+    "id": "phase-5",
+    "name": "Phase 5 — Multi-Object Sequence",
+    "steps": [
+      { "id": 1, "label": "Pick up the orange circular cap", "expected_object": "orange_circular_cap", "expected_action": "GRASP" },
+      { "id": 2, "label": "Place the orange cap on yellow square", "expected_object": "orange_circular_cap", "expected_action": "RELEASE", "target_surface": "yellow_square" },
+      { "id": 3, "label": "Pick up the red computer mouse", "expected_object": "red_computer_mouse", "expected_action": "GRASP" },
+      { "id": 4, "label": "Place the mouse on pink square", "expected_object": "red_computer_mouse", "expected_action": "RELEASE", "target_surface": "pink_square" },
+      { "id": 5, "label": "Pick up the wireless earbuds case", "expected_object": "wireless_earbuds_case", "expected_action": "GRASP" },
+      { "id": 6, "label": "Place the earbuds case on green square", "expected_object": "wireless_earbuds_case", "expected_action": "RELEASE", "target_surface": "green_square" },
+      { "id": 7, "label": "Pick up the dark blue square", "expected_object": "dark_blue_square", "expected_action": "GRASP" },
+      { "id": 8, "label": "Place the dark blue square on white box", "expected_object": "dark_blue_square", "expected_action": "RELEASE", "target_surface": "white_box" }
+    ]
+  },
+  {
+    "id": "phase-6",
+    "name": "Phase 6 — Vyomdrishti 4-Object Inspection",
+    "steps": [
+      { "id": 1, "label": "Inspect orange circular cap (5s hold)", "expected_object": "orange_circular_cap", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 2, "label": "Inspect red computer mouse (5s hold)", "expected_object": "red_computer_mouse", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 3, "label": "Inspect wireless earbuds case (5s hold)", "expected_object": "wireless_earbuds_case", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 4, "label": "Inspect white box (5s hold)", "expected_object": "white_box", "expected_action": "INSPECT", "duration": 5.0 }
+    ]
+  },
+  {
+    "id": "phase-7",
+    "name": "Phase 7 — Complete Inspection & Placement",
+    "steps": [
+      { "id": 1, "label": "Inspect orange circular cap", "expected_object": "orange_circular_cap", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 2, "label": "Place orange cap on dark blue square", "expected_object": "orange_circular_cap", "expected_action": "RELEASE", "target_surface": "dark_blue_square" },
+      { "id": 3, "label": "Inspect red computer mouse", "expected_object": "red_computer_mouse", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 4, "label": "Place red mouse on yellow square", "expected_object": "red_computer_mouse", "expected_action": "RELEASE", "target_surface": "yellow_square" },
+      { "id": 5, "label": "Inspect wireless earbuds case", "expected_object": "wireless_earbuds_case", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 6, "label": "Place earbuds case on pink square", "expected_object": "wireless_earbuds_case", "expected_action": "RELEASE", "target_surface": "pink_square" },
+      { "id": 7, "label": "Inspect white box", "expected_object": "white_box", "expected_action": "INSPECT", "duration": 5.0 },
+      { "id": 8, "label": "Place white box on green square", "expected_object": "white_box", "expected_action": "RELEASE", "target_surface": "green_square" }
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+# SIH PS 26174 - V3 experiment procedure
+# STEP_ID | NATURAL_LANGUAGE_INSTRUCTION
+
+1 | Pick up the mouse and place it in Slot 1.
+2 | Pick up the earbuds case and place it in Slot 2.
+3 | Pick up the orange box and place it in Slot 3.
+4 | Pick up the white box and place it in Slot 4.

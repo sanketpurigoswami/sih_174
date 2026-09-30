@@ -1,0 +1,2 @@
+# No third-party runtime dependency.
+# Python 3.10+ recommended.

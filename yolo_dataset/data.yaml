@@ -3,9 +3,16 @@ path: F:/sih/yolo_dataset
 train: images/train
 val: images/val
 
+nc: 10
+
 names:
-  0: screwdriver
-  1: nail_cutter
+  0: orange_circular_cap
+  1: red_computer_mouse
   2: wireless_earbuds_case
-  3: chocolate_bar_wrapper
-  4: hand
+  3: dark_blue_square
+  4: yellow_square
+  5: pink_square
+  6: green_square
+  7: white_box
+  8: person
+  9: hand

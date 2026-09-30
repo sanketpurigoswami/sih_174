@@ -9,7 +9,7 @@ overrides = {
     "mode": "predict",
     "imgsz": 644,
     "quantize": 16,
-    "conf": 0.15,
+    "conf": 0.40,
     "save": True
 }
 
@@ -22,10 +22,15 @@ image_folder = Path("F:/sih/unannotated images")
 
 # Each prompt corresponds to a class ID
 prompts = [
-    "screwdriver",
-    "nail cutter",
-    "wireless earbuds case",
-    "chocolate bar wrapper",
+    "orange circular cap",
+    "red computer mouse",
+    "small black pebble shaped object except on red computer mouse",
+    "dark blue square",
+    "yellow square",
+    "pink square",
+    "green square",
+    "white box",
+    "person",
     "hand"
 ]
 

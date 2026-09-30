@@ -9,7 +9,7 @@ model = YOLO("F:/sih/runs/detect/train/weights/best.pt")
 # YOLO processes the video one frame at a time
 # and places bounding boxes around recognized objects.
 results = model.predict(
-    source="F:/sih/unannotated images/test_video.mp4",
+    source="F:/sih/testvideo.mp4",
     save=True,
     conf=0.25
 )

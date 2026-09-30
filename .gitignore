@@ -1,1 +1,27 @@
+# Large Model Weights and Checkpoints
 sam3.pt
+checkpoints/
+*.ckpt
+
+# User constraint: dont push temporal_clips folder and weights file in instanthmr
+temporal_clips/
+InstantHMR/models/
+InstantHMR/assets.zip
+InstantHMR/.venv/
+InstantHMR/.scratch/
+InstantHMR/.git/
+InstantHMR/.git_backup/
+
+# Video artifacts (>50MB) and outputs
+*.mp4
+outputs/
+runs/
+
+# Python cache & environment
+__pycache__/
+*.py[cod]
+*$py.class
+.cache/
+node_modules/
+.DS_Store
+._*

@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+"""Run the student through a real DDP Reducer before submitting to the cluster.
+
+    python tools/ddp_smoke.py --backbone hgnetv2_b4 --w-verts 0.35
+    python tools/ddp_smoke.py --backbone repvit_m2_3        # the control
+    python tools/ddp_smoke.py --image-size 288               # a non-224 input
+
+WHY THIS EXISTS. A plain single-process smoke run -- `train_distill_jz.py` on a
+laptop, `--self-test`, `--overfit-test` -- builds no DDP Reducer at all, so it
+cannot see the one class of failure that only exists under `srun`: a parameter
+that never receives a gradient. `52_train_ddp.slurm` runs
+`DistributedDataParallel` with the default `find_unused_parameters=False`, which
+aborts on the SECOND optimiser step with
+
+    Expected to have finished reduction in the prior iteration before starting
+    a new one ... Parameter indices which did not receive grad for rank N: 241
+
+and nothing before that step warns you. On 2026-09-11 that cost all four
+generation-7 `hgnetv2_b4` jobs: `forward_features()` stops before the timm
+classifier head, and `num_classes=0` empties that head for `repvit_m2_3` but
+leaves `hgnetv2_b4` a 2048x2048 `last_conv` -- 4,194,304 parameters with no
+gradient. The repvit arms ran for nine hours while every hgnet arm died at
+step 2.
+
+World size 1 is enough: the Reducer and its unused-parameter check are built and
+run identically at any world size, so this reproduces the cluster error exactly,
+on one GPU, in under a minute. The batch size is small for the same reason --
+see --batch_size; on a login node a large one is killed for memory, not for
+anything this is testing. It does NOT test NCCL, multi-node bring-up or
+gradient bucketing across ranks -- only that every parameter participates.
+
+Exit status is 0 when every parameter received a gradient, 1 otherwise, so it
+can gate a submission.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+import numpy as np
+import torch
+import torch.distributed as dist
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "instanthmr_distill_train"))
+import train_distill_mhr_only as T  # noqa: E402
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--backbone", default=None, help="timm name; default is the config's")
+    p.add_argument("--image-size", dest="image_size", type=int, default=None,
+                   help="network input side; the positional grid and every crop follow it")
+    p.add_argument("--data_root", default="data")
+    p.add_argument("--batch_size", type=int, default=2,
+                   help="Small on purpose. Which parameters receive a gradient "
+                        "does not depend on the batch size, and a Jean Zay "
+                        "LOGIN node kills a process around 3-4 GB: measured peak "
+                        "RSS is 4.49 GB for repvit_m2_3 at batch 8 (killed) "
+                        "against 2.45 GB at batch 2. Raise it only if you are on "
+                        "a compute node.")
+    p.add_argument("--losses", choices=("legacy", "rebalanced"), default="rebalanced")
+    p.add_argument("--w-verts", dest="w_verts", type=float, default=0.0)
+    p.add_argument("--bound-scales", dest="bound_scales", action="store_true", default=True)
+    p.add_argument("--cliff-focal", dest="cliff_focal", action="store_true", default=True)
+    p.add_argument("--crop-centre-fix", dest="crop_centre_fix", action="store_true", default=True)
+    p.add_argument("--exact-landmarks", dest="exact_landmarks", action="store_true",
+                   help="Use the teacher's exact landmark readout, which widens "
+                        "the skinned vertex subset.")
+    p.add_argument("--cont-head", dest="cont_head", action="store_true",
+                   help="Build the teacher's continuous regression head instead "
+                        "of the linear 204-vector head. A changed head shape is "
+                        "exactly the class of change this exists to gate.")
+    p.add_argument("--pretrained", action="store_true",
+                   help="Load the timm weights too. Off by default: the head "
+                        "geometry this checks does not depend on them.")
+    args = p.parse_args()
+
+    os.environ.setdefault("MASTER_ADDR", "127.0.0.1")
+    os.environ.setdefault("MASTER_PORT", "29517")
+    # gloo, not nccl: this needs no GPU-to-GPU transport and must run on a
+    # laptop with one card (or none).
+    dist.init_process_group(backend="gloo", rank=0, world_size=1)
+
+    cfg = T.DistillConfig()
+    T.cfg = cfg
+    if args.losses == "rebalanced":
+        T.apply_rebalanced_losses(cfg)
+    cfg.data_root = args.data_root
+    cfg.bound_scales = args.bound_scales
+    cfg.cliff_focal = args.cliff_focal
+    cfg.crop_centre_fix = args.crop_centre_fix
+    cfg.w_verts = args.w_verts
+    if args.cont_head:
+        cfg.cont_head = True
+        cfg.root_rot_loss = True
+    if args.exact_landmarks:
+        cfg.exact_landmarks = True
+    if args.backbone:
+        cfg.backbone = args.backbone
+    if args.image_size is not None:
+        if args.image_size % 32:
+            raise SystemExit(f"--image-size {args.image_size} is not a multiple of 32")
+        cfg.image_size = args.image_size
+
+    ds = T.SAM3DStudentDataset(cfg.data_root, augment=True, max_images=args.batch_size,
+                               per_dataset_caps={}, cliff_focal=cfg.cliff_focal,
+                               crop_centre_fix=cfg.crop_centre_fix,
+                               image_size=cfg.image_size)
+    loader = torch.utils.data.DataLoader(ds, batch_size=args.batch_size, num_workers=0)
+    batch = {k: (v.to(T.device) if torch.is_tensor(v) else v)
+             for k, v in next(iter(loader)).items()}
+
+    mhr = T.MHRForwardPass(
+        cfg.mhr_model_path, T.device, kp_regressor=np.load(cfg.kp_regressor_path),
+        n_verts=cfg.n_verts if cfg.w_verts > 0 else 0,
+        landmark_assets=cfg.landmark_assets_path if cfg.exact_landmarks else None)
+    T.mhr_module = mhr
+
+    model = T.InstantHMRStudent(cfg, pretrained=args.pretrained).to(T.device)
+    n = sum(q.numel() for q in model.parameters())
+    print(f"{cfg.backbone}: {n/1e6:.2f} M parameters, "
+          f"head={'continuous' if cfg.cont_head else 'linear'}, "
+          f"landmarks={'exact' if cfg.exact_landmarks else 'fitted'}, "
+          f"w_verts={cfg.w_verts}, batch {args.batch_size}")
+
+    ddp = torch.nn.parallel.DistributedDataParallel(model)   # find_unused_parameters=False
+    crit = T.DistillationLoss(cfg, mhr)
+    crit.warmup_steps = 0                                    # full-strength FK terms
+
+    # TWO iterations. The Reducer only reports unused parameters when a new
+    # forward starts before the previous reduction completed, so one step passes
+    # even on a broken model -- which is how this was missed the first time.
+    try:
+        for _ in range(2):
+            out = ddp(batch["image"], batch["cliff_cond"].to(T.device))
+            crit(out, batch)["total_loss"].backward()
+    except RuntimeError as e:
+        print(f"\n❌ DDP rejected {cfg.backbone}:\n{e}")
+        print("\nThe named index is a position in list(model.parameters()); "
+              "list(model.named_parameters())[i] gives the parameter.")
+        return 1
+    finally:
+        dist.destroy_process_group()
+
+    missing = [k for k, q in model.named_parameters() if q.grad is None]
+    if missing:
+        print(f"\n❌ {len(missing)} parameter(s) never received a gradient:")
+        for k in missing:
+            print(f"   {k}")
+        return 1
+
+    print(f"✅ every parameter received a gradient over 2 DDP steps")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

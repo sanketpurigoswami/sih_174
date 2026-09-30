@@ -1,0 +1,12 @@
+              precision    recall  f1-score   support
+
+       GRASP     1.0000    1.0000    1.0000        10
+        IDLE     1.0000    0.9000    0.9474        10
+      PICKUP     0.8889    0.8889    0.8889         9
+       PLACE     1.0000    0.8889    0.9412         9
+   TRANSPORT     1.0000    1.0000    1.0000        11
+     RELEASE     0.8000    1.0000    0.8889         8
+
+    accuracy                         0.9474        57
+   macro avg     0.9481    0.9463    0.9444        57
+weighted avg     0.9544    0.9474    0.9483        57

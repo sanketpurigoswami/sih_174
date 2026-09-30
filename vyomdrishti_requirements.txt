@@ -1,0 +1,9 @@
+# VYOMDRISHTI server dependencies
+# Install with:  pip install -r vyomdrishti_requirements.txt
+
+flask>=3.0
+flask-cors>=4.0
+opencv-python>=4.9
+numpy>=1.24
+ultralytics>=8.0
+mediapipe>=0.10

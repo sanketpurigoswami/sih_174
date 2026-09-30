@@ -1,0 +1,6 @@
+{"timestamp":2.10,"action":"GRASP","object":"mouse","object_id":1,"person_id":1,"hand":"right","confidence":0.93}
+{"timestamp":3.40,"action":"LIFT","object":"mouse","object_id":1,"person_id":1,"hand":"right","confidence":0.92}
+{"timestamp":5.20,"action":"PLACE","object":"mouse","target":"slot 1","object_id":1,"person_id":1,"hand":"right","confidence":0.95}
+{"timestamp":7.10,"action":"GRASP","object":"earbuds case","object_id":2,"person_id":1,"hand":"right","confidence":0.91}
+{"timestamp":8.80,"action":"LIFT","object":"earbuds case","object_id":2,"person_id":1,"hand":"right","confidence":0.90}
+{"timestamp":10.10,"action":"PLACE","object":"earbuds case","target":"slot 2","object_id":2,"person_id":1,"hand":"right","confidence":0.94}

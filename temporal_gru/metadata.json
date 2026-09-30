@@ -1,0 +1,26 @@
+{
+  "class_names": [
+    "GRASP",
+    "IDLE",
+    "PICKUP",
+    "PLACE",
+    "TRANSPORT",
+    "RELEASE"
+  ],
+  "object_class_names": [
+    "orange_circular_cap",
+    "red_computer_mouse",
+    "wireless_earbuds_case",
+    "dark_blue_square",
+    "yellow_square",
+    "pink_square",
+    "green_square",
+    "white_box",
+    "person",
+    "hand"
+  ],
+  "window_size": 20,
+  "window_stride": 2,
+  "feature_fps": 20.0,
+  "input_features": 248
+}

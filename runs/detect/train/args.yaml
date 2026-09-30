@@ -2,7 +2,7 @@ task: detect
 mode: train
 model: yolo11n.pt
 data: F:/sih/yolo_dataset/data.yaml
-epochs: 50
+epochs: 30
 time: null
 patience: 100
 batch: 16
@@ -13,7 +13,7 @@ cache: false
 device: '0'
 workers: 0
 project: null
-name: train-4
+name: train
 exist_ok: false
 pretrained: true
 cls_remap: true
@@ -113,4 +113,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: tracktrack.yaml
-save_dir: F:\sih\runs\detect\train-4
+save_dir: F:\sih\runs\detect\train

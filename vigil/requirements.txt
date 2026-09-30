@@ -1,0 +1,7 @@
+flask>=3.0
+flask-socketio>=5.3
+eventlet>=0.35
+opencv-python>=4.8
+numpy>=1.24
+mediapipe>=0.10
+ultralytics>=8.0

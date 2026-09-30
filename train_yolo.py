@@ -8,7 +8,7 @@ model = YOLO("yolo11n.pt")
 # Fine-tune YOLO on our custom dataset
 model.train(
     data="F:/sih/yolo_dataset/data.yaml",
-    epochs=50,
+    epochs=30,
     imgsz=640,
     device=0,
     workers=0

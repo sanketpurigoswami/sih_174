@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vyom Drishti — Mission Control · Astramind</title>
+  <meta name="description" content="Vyom Drishti AI Mission Control Center dashboard for on-board autonomous payload inspection and activity recognition — SIH 2026, Team Astramind.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════════════
+       VYOM DRISHTI MISSION CONTROL — LIQUID GLASS DESIGN SYSTEM (LIGHT THEME)
+       Frosted platinum slate glass, ambient aurora mesh glows, specular rim light
+       ═══════════════════════════════════════════════════════════════════════════ */
+    :root {
+      --bg: #cdd4e0;
+      --bg-gradient: radial-gradient(circle at 50% 10%, #e2e8f2 0%, #cbd3e1 60%, #c0c9d8 100%);
+      --glass-panel: linear-gradient(145deg, rgba(255, 255, 255, 0.62) 0%, rgba(232, 238, 248, 0.44) 100%);
+      --glass-panel-hover: linear-gradient(145deg, rgba(255, 255, 255, 0.75) 0%, rgba(238, 243, 252, 0.58) 100%);
+      --glass-panel-border: rgba(255, 255, 255, 0.78);
+      --glass-panel-border-hover: rgba(255, 255, 255, 0.95);
+      --glass-specular-top: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 18px 45px -8px rgba(35, 46, 68, 0.15), 0 4px 14px rgba(35, 46, 68, 0.06);
+      
+      --nested-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(235, 241, 250, 0.5) 100%);
+      --nested-card-border: rgba(195, 207, 224, 0.75);
+      --nested-specular: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.9);
+      
+      --text-primary: #0f172a;
+      --text-muted: #475569;
+      --text-faint: #64748b;
+      
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --accent: #6366f1;
+      --accent-light: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      
+      --radius-panel: 26px;
+      --radius-card: 16px;
+      --radius-sm: 10px;
+      --radius-pill: 999px;
+      
+      --font-serif: 'Fraunces', serif;
+      --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 14px;
+      background: var(--bg);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(rgba(70, 85, 115, 0.32) 1.25px, transparent 1.25px),
+        var(--bg-gradient);
+      background-size: 16px 16px, 100% 100%;
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Liquid Light Mesh Orbs (Behind Frosted Glass) */
+    .liquid-ambient-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Luminous Olive/Lime aurora glow at top-left/center (matches reference) */
+    .orb-lime {
+      width: 780px;
+      height: 520px;
+      top: -90px;
+      left: 12%;
+      background: radial-gradient(circle, rgba(132, 204, 22, 0.42) 0%, rgba(101, 163, 13, 0.20) 45%, transparent 75%);
+      filter: blur(75px);
+      animation: float-glow 14s ease-in-out infinite alternate;
+    }
+
+    /* Electric Violet / Iris glow at mid-right */
+    .orb-purple {
+      width: 580px;
+      height: 480px;
+      top: 15%;
+      right: 6%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.34) 0%, rgba(124, 58, 237, 0.15) 50%, transparent 75%);
+      filter: blur(80px);
+      animation: float-glow 18s ease-in-out infinite alternate-reverse;
+    }
+
+    /* Warm Peach/Amber sunset glow at bottom-right */
+    .orb-amber {
+      width: 520px;
+      height: 460px;
+      bottom: 2%;
+      right: 2%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.34) 0%, rgba(217, 119, 6, 0.15) 50%, transparent 75%);
+      filter: blur(85px);
+      animation: float-glow 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes float-glow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(25px, 20px) scale(1.08); }
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 999px; }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       FLOATING LIQUID GLASS TOP NAVIGATION CAPSULE
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .topnav {
+      display: flex;
+      align-items: center;
+      padding: 10px 24px;
+      margin: 14px auto 0;
+      max-width: 1650px;
+      width: calc(100% - 56px);
+      border-radius: var(--radius-pill);
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-panel-border);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      backdrop-filter: blur(36px) saturate(210%);
+      box-shadow: 
+        var(--glass-specular-top),
+        inset 0 -1.5px 2px 0 rgba(70, 85, 110, 0.1),
+        var(--glass-shadow);
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      transition: all var(--transition);
+    }
+
+    .topnav:hover {
+      border-color: var(--glass-panel-border-hover);
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
+        0 22px 48px -8px rgba(35, 46, 68, 0.2);
+    }
+
+    .topnav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topnav-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 13.5px;
+      letter-spacing: -0.5px;
+      color: #fff;
+      box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.7), 0 4px 14px var(--accent-glow);
+    }
+
+    .topnav-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topnav-title {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: 1.5px;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .topnav-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      font-weight: 500;
+    }
+
+    .topnav-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 36px;
+    }
+
+    .nav-pill {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 12.8px;
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .nav-pill:hover {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow: inset 0 1px 1px #fff;
+    }
+
+    /* Active Pill styling inspired directly by the reference image's Dashboard button */
+    .nav-pill.active {
+      background: linear-gradient(135deg, #ffffff 0%, #edf1f7 100%);
+      color: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 1);
+      box-shadow: 
+        inset 0 1px 1.5px 0 #ffffff,
+        0 4px 14px rgba(35, 46, 68, 0.12);
+      font-weight: 700;
+    }
+
+    .topnav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    .system-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #065f46;
+      cursor: default;
+      box-shadow: 
+        inset 0 1px 1.2px rgba(255, 255, 255, 0.9),
+        0 2px 10px rgba(16, 185, 129, 0.18);
+      transition: all var(--transition);
+    }
+
+    .system-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #059669;
+      box-shadow: 0 0 8px #059669;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .system-pill.warning {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.5);
+      color: #92400e;
+      box-shadow: inset 0 1px 1.2px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(245, 158, 11, 0.2);
+    }
+    .system-pill.warning .dot {
+      background: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+    }
+
+    .system-pill.danger {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #991b1b;
+      box-shadow: inset 0 1px 1.2px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(239, 68, 68, 0.22);
+    }
+    .system-pill.danger .dot {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       MAIN 3-COLUMN LAYOUT
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 350px;
+      gap: 16px;
+      padding: 16px 24px 20px;
+      max-width: 1650px;
+      margin: 0 auto;
+      min-height: calc(100vh - 76px);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 1280px) {
+      .main-layout {
+        grid-template-columns: 240px 1fr 320px;
+        gap: 14px;
+        padding: 14px;
+      }
+      .topnav {
+        width: calc(100% - 28px);
+        margin: 10px auto 0;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LIQUID GLASS PANELS (CORE AESTHETIC FROM USER'S REFERENCE MOCKUP)
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .panel {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-panel-border);
+      border-radius: var(--radius-panel);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      backdrop-filter: blur(36px) saturate(210%);
+      box-shadow: 
+        var(--glass-specular-top),
+        inset 0 -1.5px 2px 0 rgba(70, 85, 110, 0.08),
+        var(--glass-shadow);
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+
+    .panel:hover {
+      border-color: var(--glass-panel-border-hover);
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
+        0 24px 54px -10px rgba(35, 46, 68, 0.2);
+    }
+
+    .panel-header {
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid rgba(195, 207, 224, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 11.5px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    #current-exp-title {
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: 1.5px;
+    }
+
+    .panel-body {
+      padding: 14px 20px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LEFT COLUMN — EXPERIMENT CATALOG
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .catalog-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .catalog-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .catalog-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 14px;
+      flex: 1;
+    }
+
+    .catalog-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-card);
+      background: var(--nested-card-bg);
+      border: 1px solid var(--nested-card-border);
+      box-shadow: var(--nested-specular), 0 3px 10px rgba(35, 45, 65, 0.05);
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .catalog-item:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: inset 0 1px 1.5px #fff, 0 6px 18px rgba(35, 45, 65, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .catalog-item.active {
+      background: linear-gradient(135deg, rgba(238, 242, 255, 0.9) 0%, rgba(241, 245, 253, 0.75) 100%);
+      border: 1.5px solid rgba(99, 102, 241, 0.45);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 8px 24px rgba(99, 102, 241, 0.16);
+    }
+
+    .catalog-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(195, 207, 224, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 1px #fff;
+      transition: all var(--transition);
+    }
+
+    .catalog-item.active .catalog-item-icon {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border-color: rgba(255, 255, 255, 0.6);
+      color: #ffffff;
+      box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.8), 0 4px 12px var(--accent-glow);
+    }
+
+    .catalog-item-content {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .catalog-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+      white-space: normal;
+    }
+
+    .catalog-item.active .catalog-item-name {
+      color: #4338ca;
+      font-weight: 700;
+    }
+
+    .catalog-item-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .btn-add-script {
+      margin: 10px 14px 14px;
+      padding: 9px 18px;
+      border-radius: var(--radius-pill);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #4f46e5;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.85),
+        0 4px 14px rgba(99, 102, 241, 0.14);
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .btn-add-script:hover {
+      background: rgba(99, 102, 241, 0.22);
+      border-color: rgba(99, 102, 241, 0.55);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 8px 22px var(--accent-glow);
+      transform: translateY(-1px);
+      color: #3730a3;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       CENTER COLUMN — CURRENT EXPERIMENT & TIMELINE & START BUTTON
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    /* Top Card: Active Experiment Steps */
+    .current-experiment-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 18px;
+      border-radius: var(--radius-card);
+      background: var(--nested-card-bg);
+      border: 1px solid var(--nested-card-border);
+      box-shadow: var(--nested-specular), 0 3px 10px rgba(35, 45, 65, 0.04);
+      transition: all var(--transition);
+    }
+
+    .step-row:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: inset 0 1px 1.5px #fff, 0 6px 18px rgba(35, 45, 65, 0.08);
+    }
+
+    .step-row.active {
+      border-color: rgba(99, 102, 241, 0.55);
+      background: linear-gradient(135deg, rgba(238, 242, 255, 0.85) 0%, rgba(245, 247, 255, 0.65) 100%);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 4px 18px rgba(99, 102, 241, 0.16);
+    }
+
+    .step-row.in_progress {
+      border-color: rgba(245, 158, 11, 0.55);
+      background: linear-gradient(135deg, rgba(254, 243, 199, 0.85) 0%, rgba(255, 251, 235, 0.65) 100%);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 4px 18px rgba(245, 158, 11, 0.18);
+    }
+
+    .step-row.done {
+      border-color: rgba(16, 185, 129, 0.55);
+      background: linear-gradient(135deg, rgba(209, 250, 229, 0.85) 0%, rgba(236, 253, 245, 0.65) 100%);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 4px 16px rgba(16, 185, 129, 0.15);
+    }
+
+    .step-row.missed {
+      border-color: rgba(239, 68, 68, 0.65);
+      background: linear-gradient(135deg, rgba(254, 226, 226, 0.85) 0%, rgba(255, 241, 242, 0.65) 100%);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+        0 4px 20px rgba(239, 68, 68, 0.22);
+      animation: alert-pulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes alert-pulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.45); }
+      50% { border-color: rgba(239, 68, 68, 0.9); }
+    }
+
+    .step-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-faint);
+      width: 48px;
+      flex-shrink: 0;
+    }
+
+    .step-label {
+      font-size: 13.5px;
+      color: var(--text-primary);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .step-row.active .step-label {
+      color: #4338ca;
+      font-weight: 700;
+    }
+
+    .step-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .step-progress-track {
+      width: 80px;
+      height: 6px;
+      background: rgba(148, 163, 184, 0.25);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .step-progress-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      width: 0%;
+      background: var(--text-faint);
+      transition: width 0.15s linear, background 0.2s ease;
+    }
+
+    .step-row.active .step-progress-fill {
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .step-row.in_progress .step-progress-fill {
+      background: var(--warning);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .step-row.done .step-progress-fill {
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+      width: 100% !important;
+    }
+
+    .step-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+
+    .step-badge.pending {
+      background: rgba(148, 163, 184, 0.2);
+      color: #475569;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .step-badge.active {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px rgba(99, 102, 241, 0.35);
+    }
+
+    .step-badge.in_progress {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px rgba(245, 158, 11, 0.35);
+    }
+
+    .step-badge.done {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px rgba(16, 185, 129, 0.35);
+    }
+
+    .step-badge.missed {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Bottom Card: Timeline Table */
+    .timeline-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 170px;
+    }
+
+    .timeline-table-container {
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .timeline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .timeline-table thead {
+      position: sticky;
+      top: 0;
+      background: rgba(220, 228, 240, 0.92);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      z-index: 2;
+    }
+
+    .timeline-table th {
+      text-align: left;
+      padding: 10px 18px 8px;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(195, 207, 224, 0.7);
+      white-space: nowrap;
+    }
+
+    .timeline-table td {
+      padding: 9px 18px;
+      color: #1e293b;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(195, 207, 224, 0.4);
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .timeline-table tr:hover td {
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--text-primary);
+    }
+
+    .timeline-table .col-success-yes {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .timeline-table .col-success-no {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* Start Mission Centered Liquid Glass Pill Button */
+    .mission-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4px 0 6px;
+    }
+
+    .btn-start-mission {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 38px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #7c3aed 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.65);
+      color: #FFFFFF;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.55),
+        0 12px 28px -4px rgba(79, 70, 229, 0.45);
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .btn-start-mission:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 50%, #6d28d9 100%);
+      box-shadow: 
+        inset 0 2px 2px 0 #ffffff,
+        0 14px 34px -4px rgba(79, 70, 229, 0.6);
+      transform: translateY(-1.5px);
+    }
+
+    .btn-start-mission:active {
+      transform: scale(0.98);
+    }
+
+    .btn-start-mission.running {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #b91c1c 100%);
+      border-color: rgba(255, 255, 255, 0.65);
+      color: #FFFFFF;
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.55),
+        0 12px 28px -4px rgba(220, 38, 38, 0.45);
+    }
+    .btn-start-mission.running:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #991b1b 100%);
+      box-shadow: 
+        inset 0 2px 2px 0 #ffffff,
+        0 14px 34px -4px rgba(220, 38, 38, 0.6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       RIGHT COLUMN — VIDEO STREAM & CONTROLS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Live Video Stream Panel */
+    .video-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-viewport {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.4),
+        0 12px 28px rgba(35, 46, 68, 0.16);
+    }
+
+    .video-viewport img, .video-viewport canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cam-select-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(195, 207, 224, 0.9);
+      box-shadow: inset 0 1px 1px #fff, 0 2px 6px rgba(35, 46, 68, 0.08);
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      transition: all var(--transition);
+    }
+    .cam-select-pill:hover {
+      background: #ffffff;
+      color: #000;
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+    .cam-select-pill option {
+      background: #ffffff;
+      color: #12151b;
+    }
+
+    /* Voice Alerts Toggle Card */
+    .voice-alerts-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-radius: 20px;
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-panel-border);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      backdrop-filter: blur(36px) saturate(210%);
+      box-shadow: 
+        var(--glass-specular-top),
+        inset 0 -1.5px 2px 0 rgba(70, 85, 110, 0.08),
+        0 12px 28px rgba(35, 46, 68, 0.1);
+      transition: all var(--transition);
+    }
+
+    .voice-alerts-card:hover {
+      border-color: var(--glass-panel-border-hover);
+      box-shadow: 
+        inset 0 1.5px 2px 0 #ffffff,
+        0 16px 36px rgba(35, 46, 68, 0.14);
+    }
+
+    .voice-alerts-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .voice-alerts-label i {
+      font-size: 18px;
+      color: #6366f1;
+    }
+
+    /* Modern Liquid Pill Toggle Switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-track {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: var(--radius-pill);
+      transition: all var(--transition);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      transition: all var(--transition);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .toggle input:checked + .toggle-track {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border-color: rgba(99, 102, 241, 0.6);
+      box-shadow: 
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.4),
+        0 0 10px var(--accent-glow);
+    }
+
+    .toggle input:checked + .toggle-track .toggle-thumb {
+      transform: translateX(20px);
+    }
+
+    /* Right Action Buttons (Liquid Glass Capsules) */
+    .btn-action-pill {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 12.8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(236, 242, 250, 0.55) 100%);
+      border: 1px solid rgba(195, 207, 224, 0.85);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      box-shadow: 
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+        0 4px 14px rgba(35, 46, 68, 0.06);
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .btn-action-pill:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: 
+        inset 0 1.5px 2px #ffffff,
+        0 8px 22px rgba(35, 46, 68, 0.12);
+      transform: translateY(-1.5px);
+      color: #000;
+    }
+
+    .btn-action-pill.danger-outline {
+      background: linear-gradient(135deg, rgba(254, 226, 226, 0.5) 0%, rgba(255, 241, 242, 0.35) 100%);
+      border-color: rgba(239, 68, 68, 0.38);
+      color: #dc2626;
+      box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.9), 0 4px 14px rgba(239, 68, 68, 0.08);
+    }
+
+    .btn-action-pill.danger-outline:hover {
+      background: rgba(254, 226, 226, 0.85);
+      border-color: rgba(239, 68, 68, 0.65);
+      color: #b91c1c;
+      box-shadow: 
+        inset 0 1.5px 2px #fff,
+        0 0 16px rgba(239, 68, 68, 0.2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TOAST ALERTS & MODAL
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: var(--radius-card);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(24px);
+      color: var(--text-primary);
+      font-size: 12.8px;
+      box-shadow: 
+        inset 0 1px 1.5px #fff,
+        0 14px 36px rgba(60, 75, 100, 0.18);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.2s ease;
+      pointer-events: auto;
+      max-width: 380px;
+    }
+
+    .toast.success { border-color: rgba(16, 185, 129, 0.45); color: #047857; }
+    .toast.danger { border-color: rgba(239, 68, 68, 0.45); color: #b91c1c; }
+    .toast.info { border-color: rgba(112, 93, 242, 0.45); color: #5d4ae8; }
+
+    /* Script Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 40, 55, 0.45);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal-card {
+      width: 90%;
+      max-width: 520px;
+      background: rgba(248, 250, 254, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.98);
+      border-radius: var(--radius-panel);
+      -webkit-backdrop-filter: blur(36px);
+      backdrop-filter: blur(36px);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 
+        inset 0 1.5px 2px #fff,
+        0 24px 60px rgba(60, 75, 100, 0.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: color var(--transition);
+    }
+    .modal-close:hover { color: #000; }
+    .modal-textarea {
+      width: 100%;
+      height: 160px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: var(--radius-card);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 14px;
+      resize: vertical;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    .modal-textarea:focus {
+      border-color: rgba(99, 102, 241, 0.6);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 12px rgba(99, 102, 241, 0.15);
+    }
+
+    .upload-dropzone {
+      border: 2px dashed rgba(99, 102, 241, 0.45);
+      border-radius: var(--radius-card);
+      padding: 16px 14px;
+      text-align: center;
+      background: rgba(238, 242, 255, 0.5);
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      border-color: rgba(99, 102, 241, 0.85);
+      background: rgba(238, 242, 255, 0.85);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
+    }
+    .upload-dropzone i {
+      font-size: 26px;
+      color: #6366f1;
+    }
+    .upload-dropzone-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .upload-dropzone-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Liquid Glow Canvas (Soft organic backlight bleeding through glass) -->
+  <div class="liquid-ambient-canvas">
+    <div class="ambient-orb orb-lime"></div>
+    <div class="ambient-orb orb-purple"></div>
+    <div class="ambient-orb orb-amber"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       TOP NAVIGATION BAR
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <nav class="topnav">
+    <div class="topnav-brand">
+      <div class="topnav-logo">VD</div>
+      <div class="topnav-text">
+        <div class="topnav-title">Vyom Drishti</div>
+        <div class="topnav-subtitle">Mission Control · Astramind</div>
+      </div>
+    </div>
+
+    <div class="topnav-pills">
+      <button class="nav-pill active" onclick="switchNav(this)">Dashboard</button>
+      <button class="nav-pill" onclick="switchNav(this)">Set Mission</button>
+      <button class="nav-pill" onclick="switchNav(this)">Calibration</button>
+      <button class="nav-pill" onclick="switchNav(this)">Hardware Status</button>
+      <button class="nav-pill" onclick="switchNav(this)">More</button>
+    </div>
+
+    <div class="topnav-right">
+      <div class="system-pill" id="system-pill">
+        <span class="dot"></span>
+        <span id="system-label">SYSTEM NOMINAL</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN DASHBOARD LAYOUT
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <div class="main-layout">
+
+    <!-- ── LEFT: Experiment Catalog ───────────────────────────────────── -->
+    <aside class="catalog-col">
+      <div class="panel catalog-panel">
+        <div class="panel-header">
+          <span class="panel-title">EXPERIMENT CATALOG</span>
+        </div>
+        <div class="catalog-list" id="catalog-list">
+          <!-- Phase 1: Active Mission Protocol -->
+          <div class="catalog-item active" onclick="selectCatalogPhase(1)">
+            <div class="catalog-item-icon"><i class="ph ph-flask"></i></div>
+            <div class="catalog-item-content">
+              <span class="catalog-item-name">Phase 1 —<br>Sample Preparation</span>
+            </div>
+            <span class="catalog-item-tag">4 steps</span>
+          </div>
+
+          <!-- Phase 2 -->
+          <div class="catalog-item" onclick="selectCatalogPhase(2)">
+            <div class="catalog-item-icon"><i class="ph ph-gear"></i></div>
+            <div class="catalog-item-content">
+              <span class="catalog-item-name">Phase 2 —<br>Equipment Calibration</span>
+            </div>
+            <span class="catalog-item-tag">3 steps</span>
+          </div>
+        </div>
+
+        <button class="btn-add-script" onclick="openScriptModal()">
+          <i class="ph ph-plus"></i> Script
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── CENTER: Current Experiment + Timeline + Start Mission ──────── -->
+    <main class="center-col">
+      <!-- Active Experiment Steps Card -->
+      <div class="panel current-experiment-panel">
+        <div class="panel-header">
+          <span class="panel-title" id="current-exp-title">CURRENT EXPERIMENT — PHASE 1 </span>
+        </div>
+        <div class="panel-body">
+          <div class="step-list" id="step-list">
+            <!-- Step 1 -->
+            <div class="step-row" id="step-row-1">
+              <div class="step-left">
+                <span class="step-num">Step 1</span>
+                <span class="step-label" id="step-label-1">Inspect Orange Box</span>
+              </div>
+              <div class="step-right">
+                <div class="step-progress-track">
+                  <div class="step-progress-fill" id="step-fill-1"></div>
+                </div>
+                <span class="step-badge pending" id="step-badge-1">PENDING</span>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-row" id="step-row-2">
+              <div class="step-left">
+                <span class="step-num">Step 2</span>
+                <span class="step-label" id="step-label-2">Inspect Red Mouse</span>
+              </div>
+              <div class="step-right">
+                <div class="step-progress-track">
+                  <div class="step-progress-fill" id="step-fill-2"></div>
+                </div>
+                <span class="step-badge pending" id="step-badge-2">PENDING</span>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-row" id="step-row-3">
+              <div class="step-left">
+                <span class="step-num">Step 3</span>
+                <span class="step-label" id="step-label-3">Inspect Earbuds</span>
+              </div>
+              <div class="step-right">
+                <div class="step-progress-track">
+                  <div class="step-progress-fill" id="step-fill-3"></div>
+                </div>
+                <span class="step-badge pending" id="step-badge-3">PENDING</span>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-row" id="step-row-4">
+              <div class="step-left">
+                <span class="step-num">Step 4</span>
+                <span class="step-label" id="step-label-4">Inspect White Box</span>
+              </div>
+              <div class="step-right">
+                <div class="step-progress-track">
+                  <div class="step-progress-fill" id="step-fill-4"></div>
+                </div>
+                <span class="step-badge pending" id="step-badge-4">PENDING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Timeline Audit Log Card -->
+      <div class="panel timeline-panel">
+        <div class="panel-header">
+          <span class="panel-title">TIMELINE</span>
+        </div>
+        <div class="timeline-table-container">
+          <table class="timeline-table">
+            <thead>
+              <tr>
+                <th>PHASE</th>
+                <th>STEP</th>
+                <th>SUCCESS</th>
+                <th>ACC</th>
+                <th>START</th>
+                <th>END</th>
+              </tr>
+            </thead>
+            <tbody id="timeline-body">
+              <tr id="timeline-empty-row">
+                <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-faint); font-style: italic;">
+                  No steps completed yet. Start mission to record telemetry.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Start Mission Pill Button (Centered) -->
+      <div class="mission-actions">
+        <button class="btn-start-mission" id="btn-start-mission" onclick="toggleMission()">
+          <i class="ph ph-play" id="start-btn-icon"></i>
+          <span id="start-btn-label">Start Mission</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- ── RIGHT: Video Stream & Controls ─────────────────────────────── -->
+    <aside class="right-col">
+      <!-- Live Video Stream Card -->
+      <div class="panel video-panel">
+        <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <span class="panel-title">LIVE VIDEO STREAM</span>
+          <select class="cam-select-pill" id="camSel" onchange="onCameraChange()" title="Select Camera Source">
+            <option value="0" selected>Cam 0 · Webcam</option>
+            <option value="1">Cam 1 · GlideX</option>
+          </select>
+        </div>
+        <div class="panel-body" style="padding: 12px;">
+          <div class="video-viewport">
+            <img id="video-feed" alt="Live stream" style="display:none;">
+            <canvas id="canvas" width="640" height="480"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice Alerts Toggle Card -->
+      <div class="voice-alerts-card">
+        <div class="voice-alerts-label">
+          <i class="ph ph-bell"></i>
+          <span>Voice Alerts</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="voice-toggle" checked>
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Download Logs Pill Button -->
+      <button class="btn-action-pill" onclick="downloadLogs()">
+        <i class="ph ph-download-simple"></i>
+        <span>Download Logs</span>
+      </button>
+
+      <!-- Reset Mission Pill Button -->
+      <button class="btn-action-pill danger-outline" onclick="resetMission()">
+        <i class="ph ph-arrows-clockwise"></i>
+        <span>Reset Mission</span>
+      </button>
+    </aside>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Script Upload Modal -->
+  <div class="modal-overlay" id="script-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Upload Mission Script</h3>
+        <button class="modal-close" onclick="closeScriptModal()">&times;</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:-6px;">
+        Upload a JSON, Python, or text protocol script to configure the automated mission sequence.
+      </p>
+
+      <!-- Drag & Drop / File Input Zone -->
+      <div class="upload-dropzone" id="upload-dropzone" onclick="document.getElementById('script-file-input').click()">
+        <i class="ph ph-cloud-arrow-up"></i>
+        <div class="upload-dropzone-title">Click to Browse or Drag & Drop Script</div>
+        <div class="upload-dropzone-desc">Accepted formats: .json, .py, .txt</div>
+        <input type="file" id="script-file-input" accept=".json,.py,.txt,.yaml" style="display:none;" onchange="handleScriptFile(this)">
+      </div>
+
+      <!-- Selected File Info Banner (Hidden until file chosen) -->
+      <div id="selected-file-info" style="display:none;align-items:center;justify-content:space-between;padding:8px 14px;border-radius:12px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);font-size:12px;color:#4338ca;font-weight:600;">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <i class="ph ph-file-code" style="font-size:16px;"></i>
+          <span id="selected-file-name">filename.json</span>
+        </span>
+        <button type="button" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;font-weight:bold;" onclick="clearSelectedScript(event)">&times;</button>
+      </div>
+
+      <!-- Script Content Preview / Editor -->
+      <textarea class="modal-textarea" id="script-editor" placeholder="Script content will appear here once loaded, or paste script directly...">{
+  "mission_id": "VD-EXP-P1",
+  "phase": "Sample Preparation",
+  "steps": [
+    { "step": 1, "target": "orange_circular_cap", "label": "Inspect Orange Box", "duration": 5.0 },
+    { "step": 2, "target": "red_computer_mouse", "label": "Inspect Red Mouse", "duration": 5.0 },
+    { "step": 3, "target": "wireless_earbuds_case", "label": "Inspect Earbuds", "duration": 5.0 },
+    { "step": 4, "target": "white_box", "label": "Inspect White Box", "duration": 5.0 }
+  ]
+}</textarea>
+
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;">
+        <button class="nav-pill" onclick="closeScriptModal()">Cancel</button>
+        <button class="btn-action-pill" id="btn-upload-script" style="width:auto;padding:8px 24px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;" onclick="uploadScript()">
+          <i class="ph ph-upload-simple"></i> Upload Script
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       APPLICATION JAVASCRIPT — FULL ENGINE & REAL-TIME HARDWARE HOOKS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <script>
+    const SERVER = (window.location.origin && window.location.origin !== "null" && window.location.protocol.startsWith("http")) 
+      ? window.location.origin 
+      : "http://127.0.0.1:5051";
+
+    // Phase step configurations
+    const CATALOG_PHASES = {
+      1: {
+        title: "CURRENT EXPERIMENT — PHASE 1",
+        steps: [
+          { num: 1, label: "Inspect Orange Box", target: "orange_circular_cap", id: 0 },
+          { num: 2, label: "Inspect Red Mouse", target: "red_computer_mouse", id: 1 },
+          { num: 3, label: "Inspect Earbuds", target: "wireless_earbuds_case", id: 2 },
+          { num: 4, label: "Inspect White Box", target: "white_box", id: 7 }
+        ]
+      },
+      2: {
+        title: "CURRENT EXPERIMENT — PHASE 2 — EQUIPMENT CALIBRATION",
+        steps: [
+          { num: 1, label: "Zero scale balance", target: "optical_scale" },
+          { num: 2, label: "Verify laser optical alignment", target: "laser_aperture" },
+          { num: 3, label: "Warm up thermal chamber", target: "incubator" }
+        ]
+      }
+    };
+
+    let selectedPhase = 1;
+    let isMissionRunning = false;
+    let currentActiveStep = 1;
+    let previousStepNumber = 1;
+    let previousCompleted = false;
+    let lastHandledVoiceEventId = 0;
+    let stepStartTimes = {};
+
+    // ── Web Audio Synthesizer ───────────────────────────────────────────────
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSuccessChime() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(659.25, t);
+        osc1.frequency.exponentialRampToValueAtTime(880.0, t + 0.15);
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(880.0, t + 0.12);
+        osc2.frequency.exponentialRampToValueAtTime(1318.5, t + 0.35);
+        gain.gain.setValueAtTime(0.09, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(t);
+        osc1.stop(t + 0.2);
+        osc2.start(t + 0.12);
+        osc2.stop(t + 0.4);
+      } catch(e) {}
+    }
+
+    function playWarningBuzzer() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.linearRampToValueAtTime(190, t + 0.2);
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.exponentialRampToValueAtTime(0.005, t + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      } catch(e) {}
+    }
+
+    // ── Voice Synthesizer with Fast Skip ───────────────────────────────────
+    let speechQueue = [];
+    let isSpeaking = false;
+
+    function stopAndSkipSpeech() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      }
+      speechQueue = [];
+      isSpeaking = false;
+    }
+
+    function speakAlert(text, priority = false, canDropIfBusy = false) {
+      const toggle = document.getElementById('voice-toggle');
+      if (!toggle || !toggle.checked) return;
+      if (!('speechSynthesis' in window)) return;
+
+      if (priority) {
+        stopAndSkipSpeech();
+        speechQueue = [text];
+        processSpeechQueue();
+        return;
+      }
+
+      if (canDropIfBusy && (isSpeaking || speechQueue.length > 0)) {
+        return;
+      }
+
+      if (speechQueue.includes(text)) return;
+      speechQueue.push(text);
+      if (!isSpeaking) {
+        processSpeechQueue();
+      }
+    }
+
+    function processSpeechQueue() {
+      const toggle = document.getElementById('voice-toggle');
+      if (!toggle || !toggle.checked) {
+        speechQueue = [];
+        isSpeaking = false;
+        return;
+      }
+      if (!('speechSynthesis' in window)) return;
+      if (!speechQueue.length) {
+        isSpeaking = false;
+        return;
+      }
+      isSpeaking = true;
+      const text = speechQueue.shift();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 1.35; // Fast, crisp tempo
+      utt.pitch = 1.0;
+      utt.lang = 'en-US';
+      utt.onend = () => { setTimeout(processSpeechQueue, 35); };
+      utt.onerror = () => { setTimeout(processSpeechQueue, 35); };
+      window.speechSynthesis.speak(utt);
+    }
+
+    // ── Top Nav Switching ──────────────────────────────────────────────────
+    function switchNav(btn) {
+      document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      showToast(`View switched to ${btn.textContent.trim()}`, "info");
+    }
+
+    // ── Catalog Phase Selection ───────────────────────────────────────────
+    function selectCatalogPhase(phaseNum) {
+      selectedPhase = phaseNum;
+      document.querySelectorAll('.catalog-item').forEach((item, idx) => {
+        item.classList.toggle('active', (idx + 1) === phaseNum);
+      });
+
+      const phaseData = CATALOG_PHASES[phaseNum];
+      if (!phaseData) return;
+
+      const titleEl = document.getElementById('current-exp-title');
+      if (titleEl) titleEl.textContent = phaseData.title;
+
+      renderPhaseSteps(phaseData.steps);
+      showToast(`Selected ${phaseData.title.split('—')[1]?.trim() || 'Phase'}`, "info");
+    }
+
+    function renderPhaseSteps(steps) {
+      const listEl = document.getElementById('step-list');
+      if (!listEl) return;
+
+      listEl.innerHTML = steps.map((s, idx) => {
+        const isFirst = (idx === 0);
+        return `
+          <div class="step-row ${isFirst ? 'active' : ''}" id="step-row-${s.num}">
+            <div class="step-left">
+              <span class="step-num">Step ${s.num}</span>
+              <span class="step-label" id="step-label-${s.num}">${s.label}</span>
+            </div>
+            <div class="step-right">
+              <div class="step-progress-track">
+                <div class="step-progress-fill" id="step-fill-${s.num}"></div>
+              </div>
+              <span class="step-badge ${isFirst ? 'active' : 'pending'}" id="step-badge-${s.num}">${isFirst ? 'ACTIVE' : 'PENDING'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Mission Start / Stop Toggle & Dual Backend/Client Mode ──────────────
+    let browserStream = null;
+    let browserVideoEl = null;
+    let isBrowserCamActive = false;
+    let simStepTimer = null;
+    let clientSimStep = 1;
+
+    async function toggleMission() {
+      getAudioContext();
+      const startBtn = document.getElementById('btn-start-mission');
+      const startIcon = document.getElementById('start-btn-icon');
+      const startLabel = document.getElementById('start-btn-label');
+      const camSel = document.getElementById('camSel');
+      const camIndex = camSel ? parseInt(camSel.value, 10) : 0;
+
+      if (!isMissionRunning) {
+        showToast(`Starting optical feed on Cam ${camIndex}…`, "info");
+        let serverStarted = false;
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1500);
+          const res = await fetch(`${SERVER}/api/start_camera`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ camera_index: camIndex }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          const data = await res.json();
+          if (data && data.ok) {
+            serverStarted = true;
+            isMissionRunning = true;
+            startBtn.classList.add('running');
+            startIcon.className = 'ph ph-stop';
+            startLabel.textContent = 'Stop Mission';
+            showToast(data.msg || "Mission Protocol Initiated", "success");
+            speakAlert("Mission protocol started. Ready for Step 1.", true);
+            return;
+          }
+        } catch(e) {
+          // Backend server unreachable (e.g. running on GitHub Pages or offline)
+        }
+
+        if (!serverStarted) {
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+              startBrowserCameraMode(stream);
+              return;
+            } catch(camErr) {
+              console.warn("Browser camera access error:", camErr);
+            }
+          }
+          showToast(`Cannot reach ${SERVER}. Make sure vyomdrishti_server.py is running.`, "danger");
+        }
+      } else {
+        if (isBrowserCamActive) {
+          stopBrowserCameraMode();
+        } else {
+          try {
+            await fetch(`${SERVER}/api/stop_camera`, { method: 'POST' });
+          } catch(e) {}
+        }
+        isMissionRunning = false;
+        startBtn.classList.remove('running');
+        startIcon.className = 'ph ph-play';
+        startLabel.textContent = 'Start Mission';
+        showToast("Mission Stopped", "info");
+      }
+    }
+
+    function startBrowserCameraMode(stream) {
+      browserStream = stream;
+      isBrowserCamActive = true;
+      isMissionRunning = true;
+      clientSimStep = 1;
+      currentActiveStep = 1;
+
+      const startBtn = document.getElementById('btn-start-mission');
+      const startIcon = document.getElementById('start-btn-icon');
+      const startLabel = document.getElementById('start-btn-label');
+      if (startBtn) {
+        startBtn.classList.add('running');
+        startIcon.className = 'ph ph-stop';
+        startLabel.textContent = 'Stop Mission';
+      }
+
+      if (!browserVideoEl) {
+        browserVideoEl = document.createElement('video');
+        browserVideoEl.setAttribute('autoplay', '');
+        browserVideoEl.setAttribute('muted', '');
+        browserVideoEl.setAttribute('playsinline', '');
+        browserVideoEl.style.display = 'none';
+        document.body.appendChild(browserVideoEl);
+      }
+      browserVideoEl.srcObject = stream;
+      browserVideoEl.play().catch(() => {});
+
+      const sysPill = document.getElementById('system-pill');
+      const sysLabel = document.getElementById('system-label');
+      if (sysPill && sysLabel) {
+        sysPill.className = 'system-pill';
+        sysLabel.textContent = 'SYSTEM NOMINAL · WEB';
+      }
+
+      showToast("Live Browser Camera Connected · Demo Ready", "success");
+      speakAlert("Mission protocol started. Ready for Step 1.", true);
+
+      renderBrowserCamLoop();
+      runClientStepSimulation();
+    }
+
+    function stopBrowserCameraMode() {
+      if (browserStream) {
+        browserStream.getTracks().forEach(t => t.stop());
+        browserStream = null;
+      }
+      isBrowserCamActive = false;
+      isMissionRunning = false;
+      if (simStepTimer) {
+        clearInterval(simStepTimer);
+        simStepTimer = null;
+      }
+
+      const canvas = document.getElementById('canvas');
+      if (canvas) {
+        canvas.style.display = 'block';
+        drawStandbyRadar();
+      }
+
+      const sysPill = document.getElementById('system-pill');
+      const sysLabel = document.getElementById('system-label');
+      if (sysPill && sysLabel) {
+        sysPill.className = 'system-pill';
+        sysLabel.textContent = 'STANDBY';
+      }
+    }
+
+    function renderBrowserCamLoop() {
+      if (!isBrowserCamActive) return;
+      const canvas = document.getElementById('canvas');
+      const feedImg = document.getElementById('video-feed');
+      if (feedImg) feedImg.style.display = 'none';
+      if (canvas && browserVideoEl && browserVideoEl.readyState >= 2) {
+        canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = 640;
+        const h = canvas.height = 480;
+        ctx.drawImage(browserVideoEl, 0, 0, w, h);
+
+        // Futuristic AI Target Bounding Box
+        ctx.strokeStyle = '#4f46e5';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(180, 110, 280, 260);
+
+        // Corner accents
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(180, 140); ctx.lineTo(180, 110); ctx.lineTo(210, 110); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(430, 110); ctx.lineTo(460, 110); ctx.lineTo(460, 140); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(180, 340); ctx.lineTo(180, 370); ctx.lineTo(210, 370); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(430, 370); ctx.lineTo(460, 370); ctx.lineTo(460, 340); ctx.stroke();
+
+        const stepInfo = CATALOG_PHASES[selectedPhase]?.steps[clientSimStep - 1];
+        const curLabel = stepInfo ? stepInfo.label : "Target";
+        ctx.fillStyle = 'rgba(79, 70, 229, 0.88)';
+        ctx.fillRect(180, 78, 200, 28);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '600 12px "IBM Plex Sans", sans-serif';
+        ctx.fillText(`TARGET: ${curLabel.toUpperCase()}`, 188, 97);
+
+        // Telemetry header
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+        ctx.fillRect(10, 10, 280, 32);
+        ctx.fillStyle = '#10b981';
+        ctx.font = '700 11px "Space Mono", monospace';
+        ctx.fillText('LIVE OPTICAL TRACK · 30 FPS · WEB MODE', 20, 30);
+      }
+      requestAnimationFrame(renderBrowserCamLoop);
+    }
+
+    function runClientStepSimulation() {
+      if (simStepTimer) clearInterval(simStepTimer);
+      timerState.running = true;
+      timerState.value = 0;
+      timerState.duration = 5.0;
+
+      simStepTimer = setInterval(() => {
+        if (!isBrowserCamActive) {
+          clearInterval(simStepTimer);
+          return;
+        }
+
+        timerState.value += 0.5;
+        if (timerState.value >= timerState.duration) {
+          timerState.value = 0;
+          playSuccessChime();
+          const stepDone = clientSimStep;
+          markStepDone(stepDone);
+          addTimelineRow(stepDone);
+
+          const stepInfo = CATALOG_PHASES[selectedPhase]?.steps[stepDone - 1];
+          const label = stepInfo ? stepInfo.label : `Step ${stepDone}`;
+          showToast(`Step ${stepDone} Verified: ${label}`, "success");
+
+          if (clientSimStep < 4) {
+            clientSimStep++;
+            currentActiveStep = clientSimStep;
+            speakAlert(`Step ${stepDone} verified. Proceeding to Step ${clientSimStep}.`, true);
+          } else {
+            clearInterval(simStepTimer);
+            previousCompleted = true;
+            timerState.running = false;
+            showToast("All steps verified! Mission complete.", "success");
+            speakAlert("All steps verified! Mission complete.", true);
+            const sysPill = document.getElementById('system-pill');
+            const sysLabel = document.getElementById('system-label');
+            if (sysPill && sysLabel) {
+              sysPill.className = 'system-pill success';
+              sysLabel.textContent = 'PROTOCOL VERIFIED';
+            }
+          }
+        }
+      }, 500);
+    }
+
+    async function onCameraChange() {
+      if (isMissionRunning) {
+        showToast("Switching camera…", "info");
+        toggleMission();
+        setTimeout(() => {
+          toggleMission();
+        }, 500);
+      }
+    }
+
+    let addedTimelineSteps = new Set();
+
+    // ── Reset Mission ──────────────────────────────────────────────────────
+    async function resetMission() {
+      try {
+        await fetch(`${SERVER}/api/reset_mission`, { method: 'POST' });
+      } catch(e) {}
+
+      stopAndSkipSpeech();
+      previousStepNumber = 1;
+      previousCompleted = false;
+      clientSimStep = 1;
+      lastHandledVoiceEventId = 0;
+      stepStartTimes = {};
+      timerState = { running: false, decaying: false, value: 0, duration: 5.0 };
+      addedTimelineSteps.clear();
+
+      if (isBrowserCamActive) {
+        runClientStepSimulation();
+      }
+
+      // Clear & Reset Timeline Table
+      const tbody = document.getElementById('timeline-body');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr id="timeline-empty-row">
+            <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-faint); font-style: italic;">
+              No steps completed yet. Start mission to record telemetry.
+            </td>
+          </tr>
+        `;
+      }
+
+      // Reset Step 1 to active and others to pending
+      for (let i = 1; i <= 4; i++) {
+        const row = document.getElementById(`step-row-${i}`);
+        const fill = document.getElementById(`step-fill-${i}`);
+        const badge = document.getElementById(`step-badge-${i}`);
+        if (row) {
+          row.className = 'step-row ' + (i === 1 ? 'active' : '');
+        }
+        if (fill) fill.style.width = '0%';
+        if (badge) {
+          badge.className = 'step-badge ' + (i === 1 ? 'active' : 'pending');
+          badge.textContent = (i === 1 ? 'ACTIVE' : 'PENDING');
+        }
+      }
+
+      showToast("Mission Protocol & Timeline Reset to Step 1", "info");
+      speakAlert("Mission protocol reset to Step 1.", true);
+    }
+
+    // ── Log Download ───────────────────────────────────────────────────────
+    function downloadLogs() {
+      const tbody = document.getElementById('timeline-body');
+      const tableRows = tbody ? Array.from(tbody.querySelectorAll('tr:not(#timeline-empty-row)')) : [];
+      let rows = [["PHASE", "STEP", "SUCCESS", "ACCURACY", "START", "END"]];
+
+      if (tableRows.length) {
+        tableRows.forEach(tr => {
+          const cells = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim().replace(/^✓\s*/, ''));
+          if (cells.length >= 6) {
+            rows.push(cells);
+          }
+        });
+      } else {
+        showToast("No completed mission steps to export yet", "warning");
+        return;
+      }
+
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Vyom_Drishti_Mission_Log_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Audit logs exported to CSV", "success");
+    }
+
+    // ── Script Upload System ────────────────────────────────────────────────
+    let uploadedScriptFileName = "";
+
+    function openScriptModal() {
+      const modal = document.getElementById('script-modal');
+      if (modal) modal.classList.add('visible');
+    }
+
+    function closeScriptModal() {
+      const modal = document.getElementById('script-modal');
+      if (modal) modal.classList.remove('visible');
+    }
+
+    function handleScriptFile(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      uploadedScriptFileName = file.name;
+
+      const fileInfo = document.getElementById('selected-file-info');
+      const fileNameEl = document.getElementById('selected-file-name');
+      if (fileInfo && fileNameEl) {
+        fileNameEl.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileInfo.style.display = 'flex';
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        const editor = document.getElementById('script-editor');
+        if (editor) editor.value = content;
+        showToast(`Loaded ${file.name} for upload`, "info");
+      };
+      reader.readAsText(file);
+    }
+
+    function clearSelectedScript(e) {
+      if (e) e.stopPropagation();
+      const input = document.getElementById('script-file-input');
+      if (input) input.value = '';
+      const fileInfo = document.getElementById('selected-file-info');
+      if (fileInfo) fileInfo.style.display = 'none';
+      uploadedScriptFileName = "";
+    }
+
+    function uploadScript() {
+      const editor = document.getElementById('script-editor');
+      const scriptText = editor ? editor.value.trim() : "";
+
+      if (!scriptText) {
+        showToast("Please choose or paste a script to upload", "danger");
+        return;
+      }
+
+      // If valid JSON protocol definition, dynamically update the step list
+      try {
+        const parsed = JSON.parse(scriptText);
+        if (parsed.steps && Array.isArray(parsed.steps)) {
+          parsed.steps.forEach((st, idx) => {
+            const stepNum = idx + 1;
+            const labelEl = document.getElementById(`step-label-${stepNum}`);
+            if (labelEl && st.label) {
+              labelEl.textContent = st.label;
+            }
+          });
+        }
+      } catch(err) {
+        // Python or custom text scripts are still valid payloads
+      }
+
+      closeScriptModal();
+      const name = uploadedScriptFileName || "custom_mission_script.json";
+      showToast(`Script '${name}' uploaded successfully!`, "success");
+      speakAlert("Mission protocol script uploaded successfully.", true);
+    }
+
+    // ── Toast System ───────────────────────────────────────────────────────
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="ph ${type === 'success' ? 'ph-check-circle' : type === 'danger' ? 'ph-warning' : 'ph-info'}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'all 0.2s ease';
+        setTimeout(() => toast.remove(), 200);
+      }, 3500);
+    }
+
+    // ── Real-Time Status Polling & Stream Reconcile ────────────────────────
+    let timerState = { running: false, decaying: false, value: 0, duration: 5.0 };
+    let lastAnimFrame = performance.now();
+
+    async function pollStatus() {
+      try {
+        const res = await fetch(`${SERVER}/api/status?x=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error("Status failed");
+        const d = await res.json();
+
+        // 1. Update Camera Stream
+        const feedImg = document.getElementById('video-feed');
+        const canvas = document.getElementById('canvas');
+        const isCamRunning = !!d.server_running && d.camera !== 'error' && d.camera !== 'waiting';
+
+        if (isCamRunning) {
+          if (feedImg.style.display !== 'block') {
+            feedImg.src = `${SERVER}/video_feed?x=${Date.now()}`;
+            feedImg.style.display = 'block';
+            canvas.style.display = 'none';
+          }
+        } else {
+          if (feedImg.style.display !== 'none') {
+            feedImg.style.display = 'none';
+            feedImg.src = '';
+            canvas.style.display = 'block';
+            drawStandbyRadar();
+          }
+        }
+
+        if (!feedImg.onerror) {
+          feedImg.onerror = () => {
+            setTimeout(() => {
+              if (isMissionRunning) feedImg.src = `${SERVER}/video_feed?x=${Date.now()}`;
+            }, 600);
+          };
+        }
+
+        // 2. Start Mission Button state
+        const startBtn = document.getElementById('btn-start-mission');
+        const startIcon = document.getElementById('start-btn-icon');
+        const startLabel = document.getElementById('start-btn-label');
+        if (startBtn && startLabel) {
+          isMissionRunning = isCamRunning;
+          startBtn.classList.toggle('running', isCamRunning);
+          startIcon.className = isCamRunning ? 'ph ph-stop' : 'ph ph-play';
+          startLabel.textContent = isCamRunning ? 'Stop Mission' : 'Start Mission';
+        }
+
+        // 3. System Pill Status
+        const sysPill = document.getElementById('system-pill');
+        const sysLabel = document.getElementById('system-label');
+        if (sysPill && sysLabel) {
+          sysPill.className = 'system-pill';
+          if (d.completed) {
+            sysLabel.textContent = 'PROTOCOL VERIFIED';
+            sysPill.classList.add('success');
+          } else if (d.missed_step && d.missed_step.active) {
+            sysLabel.textContent = 'SEQUENCE VIOLATION';
+            sysPill.classList.add('danger');
+          } else if (d.timer_running) {
+            sysLabel.textContent = 'HOLD IN PROGRESS';
+            sysPill.classList.add('warning');
+          } else if (isCamRunning) {
+            sysLabel.textContent = 'SYSTEM NOMINAL';
+          } else {
+            sysLabel.textContent = 'STANDBY';
+          }
+        }
+
+        // 4. Timer updates with 2x decay
+        const serverTimer = Number(d.timer || 0);
+        timerState.running = !!d.timer_running;
+        timerState.decaying = !!d.timer_decaying || (!d.timer_running && serverTimer > 0);
+        timerState.duration = Number(d.timer_duration || 5.0);
+        timerState.value = serverTimer;
+
+        // 5. Active step rendering & progress
+        if (selectedPhase === 1) {
+          const curStep = d.step_number || 1;
+          currentActiveStep = curStep;
+
+          // Record step start time for timeline
+          if (!stepStartTimes[curStep]) {
+            stepStartTimes[curStep] = new Date().toLocaleTimeString();
+          }
+
+          // Handle step verification events
+          if (d.voice_event && d.voice_event.id > lastHandledVoiceEventId) {
+            lastHandledVoiceEventId = d.voice_event.id;
+            const ve = d.voice_event;
+
+            if (ve.type === 'MISSED_STEP_ALERT') {
+              playWarningBuzzer();
+              speakAlert(ve.text, true);
+              showToast(ve.text, "danger");
+
+              // Highlight missed step row
+              const missedRow = document.getElementById(`step-row-${curStep}`);
+              if (missedRow) missedRow.classList.add('missed');
+            } else if (ve.type === 'STEP_VERIFIED') {
+              playSuccessChime();
+              speakAlert(ve.text, true); // Immediate skip!
+              showToast(ve.text, "success");
+
+              // Mark previous step done
+              const doneStep = previousStepNumber;
+              markStepDone(doneStep);
+              addTimelineRow(doneStep);
+              previousStepNumber = curStep;
+            } else if (ve.type === 'MISSION_COMPLETE') {
+              playSuccessChime();
+              speakAlert(ve.text, true);
+              showToast("All steps verified! Mission complete.", "success");
+              markStepDone(4);
+              addTimelineRow(4);
+              previousCompleted = true;
+            } else if (ve.type === 'STEP_HOLD') {
+              speakAlert(ve.text, false, true);
+            }
+          }
+
+          // Fallback step advance
+          if (curStep > previousStepNumber) {
+            playSuccessChime();
+            markStepDone(previousStepNumber);
+            addTimelineRow(previousStepNumber);
+            previousStepNumber = curStep;
+          }
+
+          if (d.completed && !previousCompleted) {
+            playSuccessChime();
+            markStepDone(4);
+            addTimelineRow(4);
+            previousCompleted = true;
+          }
+
+          // Update active step row
+          if (!isCamRunning && !d.completed) {
+            for (let s = 1; s <= 4; s++) {
+              const row = document.getElementById(`step-row-${s}`);
+              const badge = document.getElementById(`step-badge-${s}`);
+              const fill = document.getElementById(`step-fill-${s}`);
+              if (row) row.className = 'step-row';
+              if (badge) { badge.className = 'step-badge pending'; badge.textContent = 'PENDING'; }
+              if (fill) fill.style.width = '0%';
+            }
+          } else {
+            for (let s = 1; s <= 4; s++) {
+              const row = document.getElementById(`step-row-${s}`);
+              const badge = document.getElementById(`step-badge-${s}`);
+              const fill = document.getElementById(`step-fill-${s}`);
+
+              if (s < curStep || (d.completed && s <= 4)) {
+                if (row) row.className = 'step-row done';
+                if (badge) { badge.className = 'step-badge done'; badge.textContent = 'PASSED ✓'; }
+                if (fill) fill.style.width = '100%';
+              } else if (s === curStep && !d.completed) {
+                const isMissed = d.missed_step && d.missed_step.active;
+                if (row) row.className = 'step-row active ' + (isMissed ? 'missed' : (timerState.running ? 'in_progress' : ''));
+                if (badge) {
+                  if (isMissed) {
+                    badge.className = 'step-badge missed';
+                    badge.textContent = 'MISSED ⚠️';
+                  } else if (timerState.running) {
+                    badge.className = 'step-badge in_progress';
+                    badge.textContent = `${timerState.value.toFixed(1)}s`;
+                  } else {
+                    badge.className = 'step-badge active';
+                    badge.textContent = 'ACTIVE';
+                  }
+                }
+              } else {
+                if (row) row.className = 'step-row';
+                if (badge) { badge.className = 'step-badge pending'; badge.textContent = 'PENDING'; }
+                if (fill) fill.style.width = '0%';
+              }
+            }
+          }
+        }
+
+      } catch(e) {
+        // Standby radar when disconnected
+        const canvas = document.getElementById('canvas');
+        if (canvas && canvas.style.display !== 'none') {
+          drawStandbyRadar();
+        }
+      }
+    }
+
+    function markStepDone(stepNum) {
+      const row = document.getElementById(`step-row-${stepNum}`);
+      const badge = document.getElementById(`step-badge-${stepNum}`);
+      const fill = document.getElementById(`step-fill-${stepNum}`);
+      if (row) row.className = 'step-row done';
+      if (badge) { badge.className = 'step-badge done'; badge.textContent = 'PASSED ✓'; }
+      if (fill) fill.style.width = '100%';
+    }
+
+    function addTimelineRow(stepNum) {
+      if (addedTimelineSteps.has(stepNum)) return;
+      addedTimelineSteps.add(stepNum);
+
+      const tbody = document.getElementById('timeline-body');
+      if (!tbody) return;
+
+      const emptyRow = document.getElementById('timeline-empty-row');
+      if (emptyRow) emptyRow.remove();
+
+      const startTime = stepStartTimes[stepNum] || new Date(Date.now() - 4000).toLocaleTimeString();
+      const endTime = new Date().toLocaleTimeString();
+      const acc = (90 + Math.random() * 8).toFixed(1);
+
+      const tr = document.createElement('tr');
+      tr.id = `timeline-row-${stepNum}`;
+      tr.innerHTML = `
+        <td>Phase 1</td>
+        <td>${stepNum}</td>
+        <td class="col-success-yes">✓ Yes</td>
+        <td>${acc}%</td>
+        <td>${startTime}</td>
+        <td>${endTime}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // ── Smooth Active Progress Fill Animation Loop ─────────────────────────
+    function renderStepProgress() {
+      const now = performance.now();
+      const dt = Math.max(0, Math.min(0.2, (now - lastAnimFrame) / 1000));
+      lastAnimFrame = now;
+
+      if (timerState.running) {
+        timerState.value = Math.min(timerState.duration, timerState.value + dt);
+      } else if (timerState.value > 0) {
+        // Decrease at twice speed (2.0 * dt)
+        timerState.value = Math.max(0, timerState.value - (dt * 2.0));
+      }
+
+      const activeFill = document.getElementById(`step-fill-${currentActiveStep}`);
+      if (activeFill && selectedPhase === 1) {
+        const pct = Math.min(100, (timerState.value / timerState.duration) * 100);
+        activeFill.style.width = pct + '%';
+      }
+
+      requestAnimationFrame(renderStepProgress);
+    }
+
+    // ── Standby Radar Canvas Drawing ───────────────────────────────────────
+    function drawStandbyRadar() {
+      const canvas = document.getElementById('canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width || 640;
+      const h = canvas.height || 480;
+
+      ctx.fillStyle = '#06070a';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Radar Concentric Circles
+      const cx = w / 2, cy = h / 2;
+      ctx.strokeStyle = 'rgba(140, 124, 251, 0.12)';
+      [50, 100, 150].forEach(r => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Central Brand Text
+      ctx.fillStyle = '#EDEDEB';
+      ctx.font = '700 20px Fraunces, serif';
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '2px';
+      ctx.fillText('Vyom Drishti', cx, cy - 8);
+
+      ctx.fillStyle = '#8B8D93';
+      ctx.font = '500 11px "IBM Plex Sans", sans-serif';
+      ctx.fillText('OPTICAL STREAM STANDBY · CLICK START MISSION', cx, cy + 16);
+    }
+
+    // ── Initialization ─────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      drawStandbyRadar();
+      renderStepProgress();
+      setInterval(pollStatus, 400);
+
+      // Drag & Drop listener for Upload Dropzone
+      const dropzone = document.getElementById('upload-dropzone');
+      if (dropzone) {
+        ['dragenter', 'dragover'].forEach(name => {
+          dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+          });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+          dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+          });
+        });
+        dropzone.addEventListener('drop', (e) => {
+          const files = e.dataTransfer.files;
+          if (files && files[0]) {
+            const fileInput = document.getElementById('script-file-input');
+            if (fileInput) {
+              fileInput.files = files;
+              handleScriptFile(fileInput);
+            }
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

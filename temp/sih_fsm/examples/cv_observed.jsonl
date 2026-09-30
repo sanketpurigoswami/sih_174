@@ -1,0 +1,12 @@
+{"timestamp":0.8,"action":"REACH","object":"MOUSE","target":"SLOT_1","confidence":0.95}
+{"timestamp":1.2,"action":"GRASP","object":"MOUSE","target":"SLOT_1","confidence":0.96}
+{"timestamp":1.8,"action":"LIFT","object":"MOUSE","target":"SLOT_1","confidence":0.94}
+{"timestamp":2.7,"action":"MOVE","object":"MOUSE","target":"SLOT_1","confidence":0.93}
+{"timestamp":3.6,"action":"PLACE","object":"MOUSE","target":"SLOT_1","confidence":0.98}
+{"timestamp":4.0,"action":"RELEASE","object":"MOUSE","target":"SLOT_1","confidence":0.99}
+{"timestamp":5.0,"action":"REACH","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.95}
+{"timestamp":5.5,"action":"GRASP","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.94}
+{"timestamp":6.1,"action":"LIFT","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.95}
+{"timestamp":6.8,"action":"MOVE","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.92}
+{"timestamp":7.5,"action":"PLACE","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.98}
+{"timestamp":7.9,"action":"RELEASE","object":"EARBUDS_CASE","target":"SLOT_2","confidence":0.99}
